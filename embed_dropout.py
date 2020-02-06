@@ -10,9 +10,11 @@ paper: https://arxiv.org/pdf/1708.02182.pdf (see Section 4.3)
 
 class EmbeddingDropout(nn.Module):
     """
-    Embedding Layer. if dropout != 0. we apply dropout to word 'types' not 'tokens' as suggested
+    Embedding Layer.
+    If embedding_dropout != 0 we apply dropout to word 'types' not 'tokens' as suggested
     in the paper https://arxiv.org/pdf/1512.05287.pdf.
-    We first map the input sequences to the corresponding embeddings (from |V| -> embedding_dim) and THEN apply dropout.
+    We first map the input sequences to the corresponding embeddings (from |V| -> embedding_dim)
+    and THEN apply dropout.
     """
     def __init__(self, num_embeddings, embedding_dim, embedding_dropout=0.):
         super().__init__()

@@ -12,11 +12,12 @@ for a difference between dropout and drop connect see https://stats.stackexchang
 class WeightDrop(torch.nn.Module):
     def __init__(self, module, weights, dropout=0, variational=False):
         """
-
-        :param module: nn.Linear or nn.LSTM
+        Dropout class that is paired with a torch module to make sure that the SAME mask
+        will be sampled and applied to ALL timesteps.
+        :param module: nn. module (e.g. nn.Linear, nn.LSTM)
         :param weights: which weights to apply dropout (names of weights of module)
         :param dropout: dropout to be applied
-        :param variational: if True applies variational dropout, if False applies drop connect (different masks!!!)
+        :param variational: if True applies Variational Dropout, if False applies DropConnect (different masks!!!)
         """
         super(WeightDrop, self).__init__()
         self.module = module
@@ -26,6 +27,9 @@ class WeightDrop(torch.nn.Module):
         self._setup()
 
     def widget_demagnetizer_y2k_edition(*args, **kwargs):
+        """
+        Smerity code I don't understand.
+        """
         # We need to replace flatten_parameters with a nothing function
         # It must be a function rather than a lambda as otherwise pickling explodes
         # We can't write boring code though, so ... WIDGET DEMAGNETIZER Y2K EDITION!
@@ -34,7 +38,8 @@ class WeightDrop(torch.nn.Module):
 
     def _setup(self):
         """
-        this function renames each 'initial weight name' to 'initial weight name' + '_raw'
+        This function renames each 'weight name' to 'weight name' + '_raw'
+        (e.g. weight_hh_l0 -> weight_hh_l0_raw)
         :return:
         """
         # Terrible temporary solution to an issue regarding compacting weights re: CUDNN RNN
@@ -48,15 +53,37 @@ class WeightDrop(torch.nn.Module):
             self.module.register_parameter(name_w + '_raw', Parameter(w.data))
 
     def _setweights(self):
+        """
+        This function samples & applies a dropout mask to the weights of the recurrent layers.
+        Specifically, for an LSTM, each gate has
+        - a W matrix ('weight_ih') that is multiplied with the input (x_t)
+        - a U matrix ('weight_hh') that is multiplied with the previous hidden state (h_t-1)
+        We sample a mask (either with Variational Dropout or with DropConnect) and apply it to
+        the matrices U and/or W.
+        The matrices to be dropped-out are in self.weights.
+        :return:
+        """
         for name_w in self.weights:
             raw_w = getattr(self.module, name_w + '_raw')
             w = None
+
             if self.variational:
+                #######################################################
+                # Variational dropout (as proposed by Gal & Ghahramani)
+                #######################################################
+                # This approach samples a mask
+
                 mask = torch.autograd.Variable(torch.ones(raw_w.size(0), 1))
                 if raw_w.is_cuda: mask = mask.cuda()
                 mask = torch.nn.functional.dropout(mask, p=self.dropout, training=True)
                 w = mask.expand_as(raw_w) * raw_w
             else:
+                #######################################################
+                # DropConnect (as presented in the AWD paper)
+                #######################################################
+                # This approach samples a mask across ALL dimensions
+                # of the weight matrix
+
                 w = torch.nn.functional.dropout(raw_w, p=self.dropout, training=self.training)
             setattr(self.module, name_w, w)
 

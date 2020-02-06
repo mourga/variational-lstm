@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
@@ -7,9 +6,10 @@ Code from https://github.com/salesforce/awd-lstm-lm
 paper: https://arxiv.org/pdf/1708.02182.pdf (see Section 4.2)
 """
 
+
 class LockedDropout(nn.Module):
     """
-
+    This function applies dropout to the input tensor x.
     """
 
     def __init__(self):
