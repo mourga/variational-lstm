@@ -10,6 +10,12 @@ paper: https://arxiv.org/pdf/1708.02182.pdf (see Section 4.2)
 class LockedDropout(nn.Module):
     """
     This function applies dropout to the input tensor x.
+    The shape of the tensor x in our implementation (contrary to Merity's AWD)
+    is [batch_size x sequence_length x feature_size].
+    So, we sample a mask from the 'feature_size' dimension,
+    but a different mask for each 'batch_size' dimension,
+    and expand it in the 'sequence_length' dimension so that
+    we apply the mask FOR EACH TIMESTEP of the RNN (= 'seq_len' dim.).
     """
 
     def __init__(self):
@@ -18,7 +24,9 @@ class LockedDropout(nn.Module):
     def forward(self, x, dropout=0.5):
         if not self.training or not dropout:
             return x
-        m = x.data.new(1, x.size(1), x.size(2)).bernoulli_(1 - dropout)
+        batch_size, seq_length, feat_size = x.size()
+        m = x.data.new(batch_size, 1, feat_size).bernoulli_(1 - dropout)
+        # m = x.data.new(1, x.size(1), x.size(2)).bernoulli_(1 - dropout)
         mask = Variable(m, requires_grad=False) / (1 - dropout)
         mask = mask.expand_as(x)
         return mask * x
