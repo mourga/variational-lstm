@@ -8,19 +8,19 @@ from locked_dropout import LockedDropout
 from my_rnn_module import RNNModule
 
 
-
 class RNNClassifier(nn.Module, RecurrentHelper):
     """
     RNN-based classifier. Contains an embedding layer, a recurrent module,
     a self-attention layer, and an output linear layer for classification.
     """
+
     def __init__(self, ntokens, nclasses, **kwargs):
         super(RNNClassifier, self).__init__()
 
         ############################################
         # Params
         ############################################
-        self.ntokens = ntokens # vocab size
+        self.ntokens = ntokens  # vocab size
         self.embed_finetune = kwargs.get("embed_finetune", False)
         self.emb_size = kwargs.get("emb_size", 50)
         self.embed_noise = kwargs.get("embed_noise", .0)
@@ -29,11 +29,11 @@ class RNNClassifier(nn.Module, RecurrentHelper):
         self.rnn_layers = kwargs.get("rnn_layers", 1)
 
         # dropouts
-        self.dropoute = kwargs.get("dropoute", .3) # embedding layer dropout
-        self.rnn_dropouti = kwargs.get("rnn_dropouti", .5) # rnn input dropout
-        self.rnn_wdrop = kwargs.get("rnn_wdrop", .5) # rnn recurrent dropout
-        self.rnn_dropouth = kwargs.get("rnn_dropouth", .5) # rnn output dropout
-        self.rnn_dropout = kwargs.get("rnn_dropout", .5) # not sure yet
+        self.dropoute = kwargs.get("dropoute", .3)  # embedding layer dropout
+        self.rnn_dropouti = kwargs.get("rnn_dropouti", .5)  # rnn input dropout
+        self.rnn_wdrop = kwargs.get("rnn_wdrop", .5)  # rnn recurrent dropout
+        self.rnn_dropouth = kwargs.get("rnn_dropouth", .5)  # rnn output dropout
+        self.rnn_dropout = kwargs.get("rnn_dropout", .5)  # not sure yet
 
         self.pack = kwargs.get("pack", True)
         # self.no_rnn = kwargs.get("no_rnn", False)
@@ -49,7 +49,6 @@ class RNNClassifier(nn.Module, RecurrentHelper):
         self.embedding = EmbeddingDropout(num_embeddings=ntokens,
                                           embedding_dim=self.emb_size,
                                           embedding_dropout=self.dropoute)
-
 
         self.rnn = RNNModule(ninput=self.emb_size,
                              nhidden=self.rnn_size,
