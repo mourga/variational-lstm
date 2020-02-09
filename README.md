@@ -31,4 +31,4 @@ pip install -r requirements.txt
 <!--
 PyTorch implementation for Variational LSTM and Monte Carlo dropout.
 -->
-
+Run `test_variational_rnn.py` to do a forward pass of the Variational RNN model.
