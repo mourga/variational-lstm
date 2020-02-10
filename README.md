@@ -1,4 +1,4 @@
-# Variational LSTM & MC dropout with Pytorch
+# Variational LSTM & MC dropout with PyTorch
 This repository is based on the Salesforce code for [AWD-LSTM](https://github.com/salesforce/awd-lstm-lm/). 
 
 There is no official PyTorch code for the _Variational RNNs_ proposed by Gal and Ghahramani in the paper [A Theoretically Grounded Application of Dropout in
