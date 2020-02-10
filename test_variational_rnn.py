@@ -30,8 +30,6 @@ if __name__ == '__main__':
 
     # dummy input tensor of shape (batch_size, seq_len)
     words = np.random.random_integers(low=0, high=V - 1, size=(batch_size, bptt))
-    # words = np.array([[2,3,4,5,6,7,2,2], [245,76,134,2,456,23,7,6]])
-
     words = torch.LongTensor(words)
 
     model = RNNClassifier(ntokens=V, nclasses=3,

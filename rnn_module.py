@@ -102,13 +102,6 @@ class RNNModule(nn.Module, RecurrentHelper):
             return [weight.new(1, bsz, self.nhid if l != self.nlayers - 1 else (
                 self.ninp if self.tie_weights else self.nhid)).zero_()
                     for l in range(self.nlayers)]
-        # if self.rnn_type == 'LSTM':
-        #     return [(weight.new(1, bsz, self.nhid if l != self.nlayers - 1 else (self.ninp if self.tie_weights else self.nhid)).zero_(),
-        #             weight.new(1, bsz, self.nhid if l != self.nlayers - 1 else (self.ninp if self.tie_weights else self.nhid)).zero_())
-        #             for l in range(self.nlayers)]
-        # elif self.rnn_type == 'QRNN' or self.rnn_type == 'GRU':
-        #     return [weight.new(1, bsz, self.nhid if l != self.nlayers - 1 else (self.ninp if self.tie_weights else self.nhid)).zero_()
-        #             for l in range(self.nlayers)]
 
     def forward(self, x, hidden=None, lengths=None, return_h=False):
         """
@@ -125,6 +118,7 @@ class RNNModule(nn.Module, RecurrentHelper):
 
         if hidden is None:
             hidden = self.init_hidden(batch_size)
+        #     todo: pad packed sequence + data loader that returns true lengths
         # if lengths is not None and self.pack:
         #
         #     ###############################################

@@ -103,7 +103,7 @@ class RNNClassifier(nn.Module, RecurrentHelper):
             ########################################
             # Use last RNN hidden state
             ########################################
-            representations = outputs
+            representations = outputs[:,-1,:]
             attentions = []
 
         ############################################
