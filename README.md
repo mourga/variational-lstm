@@ -7,7 +7,7 @@ Recurrent Neural Networks](https://papers.nips.cc/paper/6241-a-theoretically-gro
 
 ![variational dropout](https://user-images.githubusercontent.com/28900064/74105210-b2a8d800-4b53-11ea-9def-ddb79b9d5d45.png)
 
-Each *square* represents an RNN unit, *horizontal arrows* represent time dependence (recurrent connections), *vertical arrows* represent the input and output to each RNN unit, coloured connections represent dropped-out inputs, with *different colours corresponding to different dropout masks*. Dashed lines correspond to standard connections with no dropout. Current techniques (naive dropout, left) use different masks at differenttime steps, with no dropout on the recurrent layers. The proposed technique (Variational RNN, right) uses the **same dropout mask at each time step, including the recurrent layers**. (Figure taken from the [paper](https://papers.nips.cc/paper/6241-a-theoretically-grounded-application-of-dropout-in-recurrent-neural-networks.pdf).
+Each *square* represents an RNN unit, *horizontal arrows* represent time dependence (recurrent connections), *vertical arrows* represent the input and output to each RNN unit, coloured connections represent dropped-out inputs, with *different colours corresponding to different dropout masks*. Dashed lines correspond to standard connections with no dropout. Current techniques (naive dropout, left) use different masks at differenttime steps, with no dropout on the recurrent layers. The proposed technique (Variational RNN, right) uses the **same dropout mask at each time step, including the recurrent layers**. (Figure taken from the [paper](https://papers.nips.cc/paper/6241-a-theoretically-grounded-application-of-dropout-in-recurrent-neural-networks.pdf)).
 
 ## Environment setup
 
