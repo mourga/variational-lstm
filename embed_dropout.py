@@ -48,7 +48,7 @@ def embedded_dropout(embed, words, dropout=0.1):
     """
     Embedding layer dropout.
     :param embed: embedding layer
-    :param words: input sequence of words. shape: (batch size x sequence length)
+    :param words: input sequence of words. shape: (batch size, sequence length)
     :param dropout: dropout to be applied to the embedding layer
     :return:
     """
@@ -71,9 +71,12 @@ def embedded_dropout(embed, words, dropout=0.1):
 
 
 if __name__ == '__main__':
-    V = 50  # vocabulary size
-    h = 4  # embedding size
-    bptt = 10  # sequence length
+    """
+    Main script to check the embedding dropout alone.
+    """
+    V = 50          # vocabulary size
+    h = 4           # embedding size
+    bptt = 10       # sequence length
     batch_size = 2  # batch size
     emb_drop = 0.1  # dropout to be applied to the embedding layer
 
@@ -87,5 +90,5 @@ if __name__ == '__main__':
     # without embedding dropout
     origX = embed(words)
 
-    # wit embedding dropout
+    # with embedding dropout
     X = embedded_dropout(embed, words, emb_drop)

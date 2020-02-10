@@ -61,8 +61,12 @@ class SelfAttention(nn.Module):
         # self.softmax = nn.Softmax(dim=-1)
 
     def forward(self, sequence, lengths):
-        # sequence size: batch_size x length x rnn size
+        """
 
+        :param sequence: shape: (batch_size, seq_length, hidden_size)
+        :param lengths:
+        :return:
+        """
         energies = self.attention(sequence).squeeze(-1)
 
         # construct a mask, based on sentence lengths
@@ -70,7 +74,8 @@ class SelfAttention(nn.Module):
 
         # scores = masked_normalization_inf(energies, mask)
         scores = masked_normalization(energies, mask)
-        # scores size: batch_size x length
+        # scores are of shape: (batch_size, seq_length)
+
         contexts = (sequence * scores.unsqueeze(-1)).sum(1)
 
         return contexts, scores

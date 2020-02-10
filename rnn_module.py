@@ -13,8 +13,8 @@ class RNNModule(nn.Module, RecurrentHelper):
                  nlayers=1,
                  bidirectional=False,
                  dropouti=0.,
-                 dropouth=0.,
-                 wdrop=0.,
+                 dropoutw=0.,
+                 dropouto=0.,
                  dropout=0.,
                  pack=True, last=False):
         """
@@ -22,7 +22,7 @@ class RNNModule(nn.Module, RecurrentHelper):
         for a variable length sequence of feature vectors, using the output
         at the last timestep of the RNN.
         We use batch_first=True for our implementation.
-        Tensors are [batch_size x sequence_length x feature_size].
+        Tensors are are shape (batch_size, sequence_length, feature_size).
         Args:
             input_size (int): the size of the input features
             rnn_size (int):
@@ -46,9 +46,11 @@ class RNNModule(nn.Module, RecurrentHelper):
         self.ninp = ninput
         self.nhid = nhidden
         self.nlayers = nlayers
-        self.dropout = dropout
-        self.dropouti = dropouti
-        self.dropouth = dropouth
+        self.dropouti = dropouti               # rnn input dropout
+        self.dropoutw = dropoutw               # rnn recurrent dropout
+        self.dropouto = dropouto               # rnn output dropout
+        if dropout == .0 and dropouto != .0:
+            self.dropout = self.dropouto       # rnn output dropout (of the last RNN layer)
 
         if rnn_type == 'LSTM':
             self.rnns = [nn.LSTM(input_size=ninput if l == 0 else nhidden[l - 1],
@@ -58,9 +60,9 @@ class RNNModule(nn.Module, RecurrentHelper):
                                  batch_first=True) for l in range(nlayers)]
 
             # Dropout to recurrent layers (matrices weight_hh AND weight_ih of each layer of the RNN)
-            if wdrop:
+            if dropoutw:
                 self.rnns = [WeightDrop(rnn, ['weight_hh_l0', 'weight_ih_l0'],
-                                        dropout=wdrop) for rnn in self.rnns]
+                                        dropout=dropoutw) for rnn in self.rnns]
         # if rnn_type == 'GRU':
         #     self.rnns = [nn.GRU(ninp if l == 0 else nhid, nhid if l != nlayers - 1 else ninp, 1, dropout=0) for l in range(nlayers)]
         #     if wdrop:
@@ -87,10 +89,7 @@ class RNNModule(nn.Module, RecurrentHelper):
     def init_hidden(self, bsz):
         """
         Initialise the hidden and cell state (h0, c0) for the first timestep (t=0).
-        Again, our implementation uses batch_first, contrary to Merity's AWD,
-        so we apply a small change in the order of the initialisation of the hidden and cell tensors.
-
-        (self.num_layers * num_directions, mini_batch, self.hidden_size)
+        Both h0, c0 are of shape (num_layers * num_directions, batch_size, hidden_size)
         :param bsz: batch size
         :return:
         """
@@ -99,7 +98,7 @@ class RNNModule(nn.Module, RecurrentHelper):
             return [(weight.new(1, bsz, self.nhid[l]).zero_(),
                      weight.new(1, bsz, self.nhid[l]).zero_())
                     for l in range(self.nlayers)]
-        elif self.rnn_type == 'QRNN' or self.rnn_type == 'GRU':
+        elif self.rnn_type == 'GRU':
             return [weight.new(1, bsz, self.nhid if l != self.nlayers - 1 else (
                 self.ninp if self.tie_weights else self.nhid)).zero_()
                     for l in range(self.nlayers)]
@@ -114,8 +113,8 @@ class RNNModule(nn.Module, RecurrentHelper):
     def forward(self, x, hidden=None, lengths=None, return_h=False):
         """
 
-        :param x: tensor (shape: batch size x sequence length x embedding size)
-        :param hidden:
+        :param x: tensor of shape (batch_size, seq_len, embedding_size)
+        :param hidden: tuple (h0, c0), each of shape (num_layers * num_directions, batch_size, hidden_size)
         :param lengths: tensor (size 1 with true lengths)
         :return:
         """
@@ -179,8 +178,22 @@ class RNNModule(nn.Module, RecurrentHelper):
         raw_outputs = []
         outputs = []
 
-        """
+        """ 
+        `batch_first = True` use of PyTorch RNN module
+        shapes of input and output tensors
+        -----------------------------------------------
         output, (hn, cn) = rnn(input, (h0, c0))
+        -----------------------------------------------
+        input: (batch_size, seq_len, input_size)
+        h0: (num_layers * num_directions, batch_size, feature_size)
+        c0: (num_layers * num_directions, batch_size, feature_size)
+        -----------------------------------------------
+        output: (batch_size, seq_len, num_directions * hidden_size]) 
+        contains the output features `(h_t)` from the last layer of the LSTM, for each `t`
+        hn: (num_layers * num_directions, batch_size, feature_size)
+        contains the hidden state for `t = seq_len`
+        cn: (num_layers * num_directions, batch_size, feature_size)
+        contains the cell state for `t = seq_len`
         """
 
         # for each layer of the RNN
@@ -191,8 +204,8 @@ class RNNModule(nn.Module, RecurrentHelper):
             new_hidden.append(new_h)
             raw_outputs.append(raw_output)
             if l != self.nlayers - 1:
-                # apply dropout to the output of the l-th RNN layer (dropouth)
-                raw_output = self.lockdrop(raw_output, self.dropouth)
+                # apply dropout to the output of the l-th RNN layer (dropouto)
+                raw_output = self.lockdrop(raw_output, self.dropouto)
                 # save 'dropped-out outputs' in a list
                 outputs.append(raw_output)
         hidden = new_hidden
