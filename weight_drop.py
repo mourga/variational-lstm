@@ -1,6 +1,5 @@
 import torch
 from torch.nn import Parameter
-from functools import wraps
 
 """
 Code from https://github.com/salesforce/awd-lstm-lm

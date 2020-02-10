@@ -19,8 +19,8 @@ class RNNClassifier(nn.Module, RecurrentHelper):
         ############################################
         # Params
         ############################################
-        self.ntokens = ntokens  # vocab size
-        self.nclasses = nclasses  # vocab size
+        self.ntokens = ntokens    # vocab size
+        self.nclasses = nclasses  # number of classes
 
         # embedding layer
         self.embed_finetune = kwargs.get("embed_finetune", False)
@@ -33,11 +33,11 @@ class RNNClassifier(nn.Module, RecurrentHelper):
         self.bidir = kwargs.get("bidir", False)
 
         # dropouts
-        self.dropoute = kwargs.get("dropoute", .0)  # embedding layer dropout
+        self.dropoute = kwargs.get("dropoute", .0)          # embedding layer dropout
         self.rnn_dropouti = kwargs.get("rnn_dropouti", .0)  # rnn input dropout
         self.rnn_dropoutw = kwargs.get("rnn_dropoutw", .0)  # rnn recurrent dropout
         self.rnn_dropouto = kwargs.get("rnn_dropouto", .0)  # rnn output dropout
-        self.rnn_dropout = kwargs.get("rnn_dropout", .0)  # rnn output dropout (of last RNN layer)
+        self.rnn_dropout = kwargs.get("rnn_dropout", .0)    # rnn output dropout (of last RNN layer)
 
         self.pack = kwargs.get("pack", True)
         # self.no_rnn = kwargs.get("no_rnn", False)

@@ -8,6 +8,14 @@ This is the main script to do a forward pass of the Variational RNN model.
 """
 
 if __name__ == '__main__':
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("torch:", torch.__version__)
+    print("Cuda:", torch.backends.cudnn.cuda)
+    print("CuDNN:", torch.backends.cudnn.version())
+    print('device: {}'.format(device))
+
+
     # dummy example
     V = 1000          # vocabulary size
     emb_size = 5      # embedding size
