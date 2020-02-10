@@ -10,7 +10,7 @@ for a difference between dropout and drop connect see https://stats.stackexchang
 
 
 class WeightDrop(torch.nn.Module):
-    def __init__(self, module, weights, dropout=0, variational=False):
+    def __init__(self, module, weights, dropout=0, variational=True):
         """
         Dropout class that is paired with a torch module to make sure that the SAME mask
         will be sampled and applied to ALL timesteps.
@@ -61,6 +61,16 @@ class WeightDrop(torch.nn.Module):
         We sample a mask (either with Variational Dropout or with DropConnect) and apply it to
         the matrices U and/or W.
         The matrices to be dropped-out are in self.weights.
+        A 'weight_hh' matrix is of shape (4*nhidden, nhidden)
+        while a 'weight_ih' matrix is of shape (4*nhidden, ninput).
+
+        **** Variational Dropout ****
+        With this method, we sample a mask from the tensor (4*nhidden, 1) PER ROW
+        and expand it to the full matrix.
+
+        **** DropConnect ****
+        With this method, we sample a mask from the tensor (4*nhidden, nhidden) directly
+        which means that we apply dropout PER ELEMENT/NEURON.
         :return:
         """
         for name_w in self.weights:
@@ -71,8 +81,6 @@ class WeightDrop(torch.nn.Module):
                 #######################################################
                 # Variational dropout (as proposed by Gal & Ghahramani)
                 #######################################################
-                # This approach samples a mask
-
                 mask = torch.autograd.Variable(torch.ones(raw_w.size(0), 1))
                 if raw_w.is_cuda: mask = mask.cuda()
                 mask = torch.nn.functional.dropout(mask, p=self.dropout, training=True)
@@ -81,9 +89,6 @@ class WeightDrop(torch.nn.Module):
                 #######################################################
                 # DropConnect (as presented in the AWD paper)
                 #######################################################
-                # This approach samples a mask across ALL dimensions
-                # of the weight matrix
-
                 w = torch.nn.functional.dropout(raw_w, p=self.dropout, training=self.training)
             setattr(self.module, name_w, w)
 
