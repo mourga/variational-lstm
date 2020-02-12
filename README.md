@@ -53,7 +53,7 @@ In the code you will see that there are various types of dropout that we can app
 * If you face the error `PackageNotFoundError: Dependency missing in current linux-64 channels:` 
   `- pytorch 1.4.0* -> mkl >=2018`, try running `conda install -c anaconda mkl` and then again `conda install pytorch=1.4.0 torchvision cudatoolkit=10.1 -c pytorch`.
   
-* If you face the error `ImportError: /lib64/libstdc++.so.6: version 'GLIBCXX_3.4.21' not found` run `conda install libgcc`.
+* If you face the error `ImportError: /lib64/libstdc++.so.6: version 'GLIBCXX_3.4.21' not found` run `conda install -c anaconda libgcc`.
 
 In order to make sure that all the required packages & dependecies are correct, I recommend running the following:
 ```
@@ -72,3 +72,23 @@ CuDNN: 7603
 device: cpu (or gpu)
 ```
 
+### new version
+```
+conda create -n awd python=3.6
+source activate awd
+conda install pytorch==1.2.0 torchvision==0.4.0 cudatoolkit=10.0 -c pytorch
+conda install -c anaconda cupy
+pip install pynvrtc git+https://github.com/salesforce/pytorch-qrnn
+```
+If:
+```
+PackageNotFoundError: Package missing in current linux-64 channels: 
+  - cudatoolkit 10.0*
+```
+try:
+```
+conda install -c anaconda cudatoolkit=10.0
+conda install -c anaconda mkl
+conda install -c anaconda libgcc
+```
+and again `conda install pytorch==1.2.0 torchvision==0.4.0 cudatoolkit=10.0 -c pytorch`.
