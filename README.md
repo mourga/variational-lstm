@@ -11,6 +11,8 @@ Each *square* represents an RNN unit, *horizontal arrows* represent time depende
 
 _MC dropout & training loop not implemented yet!_
 
+* There is a problem with pytorch 1.4.0 (see [issue](https://github.com/pytorch/pytorch/issues/32346)) and the AWD implementation, so I will change the pytorch version. The code runs fine in a CPU.
+
 ## Software Requirements
 Python 3 and PyTorch=1.4.0 are required for the current codebase.
 
